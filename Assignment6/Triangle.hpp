@@ -85,7 +85,7 @@ bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1, const Vector3f
         return false;
     }
 
-    if (1.0f - b1 - b2 >= 0.001f)
+    if (1.0f - b1 - b2 >= TEMP_EPSILON)
     {
         tnear = t;
         u = b1;
@@ -270,6 +270,27 @@ inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
 
 inline Intersection Triangle::getIntersection(Ray ray)
 {
+    //Intersection inter;
+    //inter.happened = false;
+
+    //float tempT = 0.0f;
+    //float u = 0.0f, v = 0.0f;
+    //inter.happened = rayTriangleIntersect(v0, v1, v2, ray.origin, ray.direction, tempT, u, v);
+
+    //if (!inter.happened|| tempT<0.0f)
+    //{
+    //    return inter;
+    //}
+
+    ////jingz 有效交点
+    //inter.distance = tempT;
+    //inter.happened = true;
+    //inter.pMaterial = m;
+    //inter.obj = this;
+    //inter.normal = normal;
+    //inter.coords = ray(tempT);
+    //return inter;
+
     Intersection inter;
 
     if (dotProduct(ray.direction, normal) > 0)
