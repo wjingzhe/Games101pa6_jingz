@@ -271,24 +271,35 @@ inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
 inline Intersection Triangle::getIntersection(Ray ray)
 {
     Intersection inter;
-    inter.happened = false;
 
-    float tempT = 0.0f;
-    float u = 0.0f, v = 0.0f;
-    inter.happened = rayTriangleIntersect(v0, v1, v2, ray.origin, ray.direction, tempT, u, v);
-
-    if (!inter.happened)
-    {
+    if (dotProduct(ray.direction, normal) > 0)
         return inter;
-    }
+    double u, v, t_tmp = 0;
+    Vector3f pvec = crossProduct(ray.direction, e2);
+    double det = dotProduct(e1, pvec);
+    if (fabs(det) < EPSILON)
+        return inter;
 
+    double det_inv = 1. / det;
+    Vector3f tvec = ray.origin - v0;
+    u = dotProduct(tvec, pvec) * det_inv;
+    if (u < 0 || u > 1)
+        return inter;
+    Vector3f qvec = crossProduct(tvec, e1);
+    v = dotProduct(ray.direction, qvec) * det_inv;
+    if (v < 0 || u + v > 1)
+        return inter;
+    t_tmp = dotProduct(e2, qvec) * det_inv;
+
+    if (t_tmp < 0)
+        return inter;
     //jingz 有效交点
-    inter.distance = tempT;
+    inter.distance = t_tmp;
     inter.happened = true;
     inter.pMaterial = m;
     inter.obj = this;
     inter.normal = normal;
-    inter.coords = ray(tempT);
+    inter.coords = ray(t_tmp);
 
     return inter;
 }

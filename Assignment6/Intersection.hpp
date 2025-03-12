@@ -9,6 +9,16 @@
 class Object;
 class Sphere;
 
+#ifdef _DEBUG
+#ifndef RECORD_RAY_HIT_PATH
+#define RECORD_RAY_HIT_PATH 1
+#endif // !RECORD_RAY_HIT_PATH
+#endif // _DEBUG
+
+#ifdef RECORD_RAY_HIT_PATH
+class BVHBuildNode;
+#endif
+
 struct Intersection
 {
     Intersection()
@@ -19,6 +29,10 @@ struct Intersection
         distance= std::numeric_limits<double>::max();
         obj =nullptr;
         pMaterial=nullptr;
+
+#ifdef RECORD_RAY_HIT_PATH
+        curBVHNode = nullptr;;
+#endif
     }
     bool happened;
     Vector3f coords;
@@ -26,5 +40,9 @@ struct Intersection
     double distance;
     Object* obj;
     Material* pMaterial;
+
+#ifdef RECORD_RAY_HIT_PATH
+    BVHBuildNode* curBVHNode;
+#endif
 };
 #endif //RAYTRACING_INTERSECTION_H

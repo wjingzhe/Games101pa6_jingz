@@ -27,26 +27,26 @@ void Renderer::Render(const Scene& scene)
     {
         for (uint32_t i = 0; i < scene.width; ++i)
         {
-            Vector3f dir_world = normalize(Vector3f(-0.0371812396f, 0.490610957f, -0.870585084)); // Don't forget to normalize this direction!
-            Ray curRay(eye_pos, dir_world);
-            framebuffer[m++] = scene.castRay(curRay, 0);//因为ndc空间和view原点、世界坐标原点空间重合，所以不需要坐标转换，直接当3D坐标使用
-
-            //// generate primary ray direction
-            //float u = 2 * ((float)i + 0.5) / scene.width;
-            //float v = 2 * ((float)j + 0.5) / scene.height;
-
-            ////将屏幕空间类的坐标偏移到和NDC一样的原点
-            //u = u - 1.0f;
-            //v = 1.0f - v;//屏幕空间y方向从左上角作为起始点，而NDC左下角为起始点
-
-            ////通过屏幕和NDC空间的比例算出原屏幕方向下对应的NDC空间方向
-            //float x = u * scale * imageAspectRatio;
-            //float y = v * scale;
-
-            ////因为ndc空间和view所在的模型空间重合，所以不需要坐标转换,即可在世界坐标系空间做相交检测
-            //Vector3f dir_world = normalize(Vector3f(x, y, -1)); // Don't forget to normalize this direction!
+            //Vector3f dir_world = normalize(Vector3f(-0.0371812396f, 0.490610957f, -0.870585084)); // Don't forget to normalize this direction!
             //Ray curRay(eye_pos, dir_world);
             //framebuffer[m++] = scene.castRay(curRay, 0);//因为ndc空间和view原点、世界坐标原点空间重合，所以不需要坐标转换，直接当3D坐标使用
+
+            // generate primary ray direction
+            float u = 2 * ((float)i + 0.5) / scene.width;
+            float v = 2 * ((float)j + 0.5) / scene.height;
+
+            //将屏幕空间类的坐标偏移到和NDC一样的原点
+            u = u - 1.0f;
+            v = 1.0f - v;//屏幕空间y方向从左上角作为起始点，而NDC左下角为起始点
+
+            //通过屏幕和NDC空间的比例算出原屏幕方向下对应的NDC空间方向
+            float x = u * scale * imageAspectRatio;
+            float y = v * scale;
+
+            //因为ndc空间和view所在的模型空间重合，所以不需要坐标转换,即可在世界坐标系空间做相交检测
+            Vector3f dir_world = normalize(Vector3f(x, y, -1)); // Don't forget to normalize this direction!
+            Ray curRay(eye_pos, dir_world);
+            framebuffer[m++] = scene.castRay(curRay, 0);//因为ndc空间和view原点、世界坐标原点空间重合，所以不需要坐标转换，直接当3D坐标使用
         }
         UpdateProgress(j / (float)scene.height);
     }

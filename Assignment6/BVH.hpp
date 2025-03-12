@@ -15,12 +15,24 @@
 #include "Intersection.hpp"
 #include "Vector.hpp"
 
+#ifdef _DEBUG
+#ifndef RECORD_RAY_HIT_PATH
+#define RECORD_RAY_HIT_PATH 1
+#endif // !RECORD_RAY_HIT_PATH
+#endif // _DEBUG
+
 struct BVHBuildNode
 {
     Bounds3 bounds;
     BVHBuildNode* left;
     BVHBuildNode* right;
     Object* object;
+
+#ifdef RECORD_RAY_HIT_PATH
+    BVHBuildNode* rayHitNodePathLeft;
+    BVHBuildNode* rayHitNodePathRight;
+    BVHBuildNode* rayHitNodePathParent;
+#endif
 
 public:
     int splitAxis = 0, firstPrimOffset = 0, nPrimitives = 0;
@@ -30,6 +42,13 @@ public:
         bounds = Bounds3();
         left = nullptr; right = nullptr;
         object = nullptr;
+
+        //jingz
+#ifdef RECORD_RAY_HIT_PATH
+        rayHitNodePathLeft = nullptr;
+        rayHitNodePathRight = nullptr;
+        rayHitNodePathParent = nullptr;
+#endif
     }
 };
 

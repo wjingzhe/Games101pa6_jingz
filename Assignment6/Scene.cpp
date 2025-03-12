@@ -100,8 +100,8 @@ Vector3f Scene::castRay(const Ray &ray, int curDepthCount) const
             }
             default:
             {
-                hitColor = Vector3f(1.0f, 0.0f, 0.0f);
-                break;
+                //hitColor = Vector3f(1.0f, 0.0f, 0.0f);
+                //break;
 
                 // [comment]
                 // We use the Phong illumation model int the default case. The phong model
@@ -124,9 +124,10 @@ Vector3f Scene::castRay(const Ray &ray, int curDepthCount) const
                     }
                     else
                     {
-                        //从着色点往光源打出射线，在世界空间做相交检测，看是否被遮挡（在阴影区内)
-                        auto Lights = get_lights_ptr();
-                        Vector3f lightDir = Lights.at(i)->position - hitPoint;
+                        ////从着色点往光源打出射线，在世界空间做相交检测，看是否被遮挡（在阴影区内)
+                        //auto Lights = get_lights_ptr();
+                        //Vector3f lightDir = Lights.at(i)->position - hitPoint;
+                        Vector3f lightDir = get_lights()[i]->position - hitPoint;
 
                         // square of the distance between hitPoint and the light
                         float lightDistance2 = dotProduct(lightDir, lightDir);

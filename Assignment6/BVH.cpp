@@ -134,7 +134,60 @@ Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
     }
     //左右子树，继续包围盒级别检测
     Intersection hitLeft = getIntersection(node->left, ray);
-    Intersection hitRight = getIntersection(node->right, ray);
+#ifdef RECORD_RAY_HIT_PATH
+    if (node->left)
+    {
+        node->left->rayHitNodePathParent = node;
+    }
+#endif
 
+    Intersection hitRight = getIntersection(node->right, ray);
+#ifdef RECORD_RAY_HIT_PATH
+    if (node->right)
+    {
+        node->right->rayHitNodePathParent = node;
+    }
+#endif
+    
+#ifdef RECORD_RAY_HIT_PATH
+    //jingz 返回值
+    if (hitLeft.distance < hitRight.distance)
+    {
+        node->rayHitNodePathRight = nullptr;
+
+        if (hitLeft.happened)
+        {
+            node->rayHitNodePathLeft = node->left;
+            node->left->rayHitNodePathParent = node;
+            hitLeft.curBVHNode = node;
+        }
+        else
+        {
+            node->rayHitNodePathLeft = nullptr;
+            hitLeft.curBVHNode = nullptr;
+        }
+
+        return hitLeft;
+    }
+    else
+    {
+        node->rayHitNodePathLeft = nullptr;
+
+        if (hitRight.happened)
+        {
+            node->rayHitNodePathRight = node->right;
+            node->right->rayHitNodePathParent = node;
+            hitRight.curBVHNode = node;
+        }
+        else
+        {
+            node->rayHitNodePathLeft = nullptr;
+            hitRight.curBVHNode = nullptr;
+        }
+
+        return hitRight;
+    }
+#else
     return hitLeft.distance < hitRight.distance ? hitLeft : hitRight;
+#endif
 }
