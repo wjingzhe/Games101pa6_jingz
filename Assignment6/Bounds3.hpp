@@ -116,6 +116,7 @@ inline bool Bounds3::IntersectP(const Ray& ray) const
     /*
     * AABB盒中ABC系统有2项为0，D项也剩余−Ax₀这种类似，约去ABC，即
     */
+    // 用速度分量思路理解：ray.origin.x以为x轴相对起始点，其中pMin.x - ray.origin.x 是相对距离标量分量除以 invDir[0] 速度份量，就能得到对应分量时间t了；再根据入射点和出射点选取合适t值
     float t_Min_x = (pMin.x - ray.origin.x) * ray.direction_inv.x;
     float t_Min_y = (pMin.y - ray.origin.y) * ray.direction_inv.y;
     float t_Min_z = (pMin.z - ray.origin.z) * ray.direction_inv.z;
