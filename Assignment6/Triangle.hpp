@@ -9,7 +9,7 @@
 #include <cassert>
 #include <array>
 
-/*
+
 bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1,
                           const Vector3f& v2, const Vector3f& orig,
                           const Vector3f& dir, float& tnear, float& u, float& v)
@@ -39,22 +39,45 @@ bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1,
 
     return true;
 }
-*/
+
 
 #define TEMP_EPSILON 1e-6
-bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& orig,
+bool rayTriangleIntersect_MollerTrumbore(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& orig,
     const Vector3f& dir, float& tnear, float& u, float& v)
 {
+    //{
+    //    auto S = orig - v0;
+    //    auto E1 = v1 - v0;
+    //    auto E2 = v2 - v0;
+    //    auto S1 = crossProduct(dir, E2);
+    //    auto S2 = crossProduct(S, E1);
+
+    //    float S1E1 = dotProduct(S1, E1);
+    //    float t = dotProduct(S2, E2) / S1E1;
+    //    float b1 = dotProduct(S1, S) / S1E1;
+    //    float b2 = dotProduct(S2, dir) / S1E1;
+
+    //    if (t >= 0.f && b1 >= 0.f && b2 >= 0.f && (1 - b1 - b2) >= 0.f) {
+    //        tnear = t;
+    //        u = b1;
+    //        v = b2;
+    //        return true;
+    //    }
+
+    //    return false;
+    //}
+
     // TODO: Implement this function that tests whether the triangle
     // that's specified bt v0, v1 and v2 intersects with the ray (whose
     // origin is *orig* and direction is *dir*)
     // Also don't forget to update tnear, u and v.
-    Vector3f dirEdge1 = v1 - v0;
-    Vector3f dirEdge2 = v2 - v0;
-    Vector3f S = orig - v0;//其他算法中的大T
 
-    Vector3f S1 = crossProduct(dir, dirEdge2);//p,射线与边2方向所在平面的法线___当作某种切线用？
-    float S1E1 = dotProduct(dirEdge1, S1);//det
+    Vector3f S = orig - v0;//其他算法中的大T
+    Vector3f E1 = v1 - v0;
+    Vector3f E2 = v2 - v0;
+
+    Vector3f S1 = crossProduct(dir, E2);//p,射线与边2方向所在平面的法线___当作某种切线用？
+    float S1E1 = dotProduct(S1,E1);//det
     //射线与平面平行
     if (abs(S1E1) <= TEMP_EPSILON)//克莱姆法则：为0，矩阵方程无解
     {
@@ -62,36 +85,42 @@ bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1, const Vector3f
     }
     float inv_S1E1 = 1.0f / S1E1;//inv_det
 
-    Vector3f S2 = crossProduct(S, dirEdge1);//Q=TxE1
-
-
-    float t = dotProduct(S2, dirEdge2) * inv_S1E1;
-    if (abs(t) <= TEMP_EPSILON)
+    Vector3f S2 = crossProduct(S, E1);//Q=TxE1
+    float t = dotProduct(S2, E2) * inv_S1E1;
+    if ( t < 0.0f)
     {
         return false;
     }
-
+    //jingz 这里有个关键条件t,b1,b2值要为0+正值
     //b1即u
     float b1 = dotProduct(S1, S) / S1E1;
-    if (abs(b1) <= TEMP_EPSILON || abs(b1) >= 1 + TEMP_EPSILON)
-    {
-        return false;
-    }
-
     // b2
     float b2 = dotProduct(S2, dir) / S1E1;
-    if (abs(b2) <= TEMP_EPSILON || abs(b2) >= 1 + TEMP_EPSILON)
-    {
-        return false;
-    }
 
-    if (1.0f - b1 - b2 >= TEMP_EPSILON)
+    if (b1 >= 0.f && b2 >= 0.f && (1 - b1 - b2) >= TEMP_EPSILON)
     {
         tnear = t;
         u = b1;
         v = b2;
         return true;
     }
+
+    //if (b1 < 0.0f || abs(b1) >= 1 + TEMP_EPSILON)
+    //{
+    //    return false;
+    //}
+
+    //if (b2 < 0.0f || abs(b2) >= 1 + TEMP_EPSILON)
+    //{
+    //    return false;
+    //}
+    //if (1.0f >= b1 + b2)
+    //{
+    //    tnear = t;
+    //    u = b1;
+    //    v = b2;
+    //    return true;
+    //}
 
     return false;
 }
@@ -194,7 +223,7 @@ public:
             const Vector3f& v2 = vertices[vertexIndex[k * 3 + 2]];
             float t, u, v;
             //可能和模型的多个三角形相交，只取最近一个
-            if (rayTriangleIntersect(v0, v1, v2, ray.origin, ray.direction, t,u, v) &&
+            if (rayTriangleIntersect_MollerTrumbore(v0, v1, v2, ray.origin, ray.direction, t,u, v) &&
                 t < tnear)
             {//jingz
                 tnear = t;
@@ -270,59 +299,59 @@ inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
 
 inline Intersection Triangle::getIntersection(Ray ray)
 {
-    //Intersection inter;
-    //inter.happened = false;
-
-    //float tempT = 0.0f;
-    //float u = 0.0f, v = 0.0f;
-    //inter.happened = rayTriangleIntersect(v0, v1, v2, ray.origin, ray.direction, tempT, u, v);
-
-    //if (!inter.happened|| tempT<0.0f)
-    //{
-    //    return inter;
-    //}
-
-    ////jingz 有效交点
-    //inter.distance = tempT;
-    //inter.happened = true;
-    //inter.pMaterial = m;
-    //inter.obj = this;
-    //inter.normal = normal;
-    //inter.coords = ray(tempT);
-    //return inter;
-
     Intersection inter;
+    inter.happened = false;
 
-    if (dotProduct(ray.direction, normal) > 0)
-        return inter;
-    double u, v, t_tmp = 0;
-    Vector3f pvec = crossProduct(ray.direction, e2);
-    double det = dotProduct(e1, pvec);
-    if (fabs(det) < EPSILON)
-        return inter;
+    float tempT = 0.0f;
+    float u = 0.0f, v = 0.0f;
+    inter.happened = rayTriangleIntersect_MollerTrumbore(v0, v1, v2, ray.origin, ray.direction, tempT, u, v);
 
-    double det_inv = 1. / det;
-    Vector3f tvec = ray.origin - v0;
-    u = dotProduct(tvec, pvec) * det_inv;
-    if (u < 0 || u > 1)
+    if (!inter.happened|| tempT<0.0f)
+    {
         return inter;
-    Vector3f qvec = crossProduct(tvec, e1);
-    v = dotProduct(ray.direction, qvec) * det_inv;
-    if (v < 0 || u + v > 1)
-        return inter;
-    t_tmp = dotProduct(e2, qvec) * det_inv;
+    }
 
-    if (t_tmp < 0)
-        return inter;
     //jingz 有效交点
-    inter.distance = t_tmp;
+    inter.distance = tempT;
     inter.happened = true;
     inter.pMaterial = m;
     inter.obj = this;
     inter.normal = normal;
-    inter.coords = ray(t_tmp);
-
+    inter.coords = ray(tempT);
     return inter;
+
+    //Intersection inter;
+
+    //if (dotProduct(ray.direction, normal) > 0)
+    //    return inter;
+    //double u, v, t_tmp = 0;
+    //Vector3f pvec = crossProduct(ray.direction, e2);
+    //double det = dotProduct(e1, pvec);
+    //if (fabs(det) < EPSILON)
+    //    return inter;
+
+    //double det_inv = 1. / det;
+    //Vector3f tvec = ray.origin - v0;
+    //u = dotProduct(tvec, pvec) * det_inv;
+    //if (u < 0 || u > 1)
+    //    return inter;
+    //Vector3f qvec = crossProduct(tvec, e1);
+    //v = dotProduct(ray.direction, qvec) * det_inv;
+    //if (v < 0 || u + v > 1)
+    //    return inter;
+    //t_tmp = dotProduct(e2, qvec) * det_inv;
+
+    //if (t_tmp < 0)
+    //    return inter;
+    ////jingz 有效交点
+    //inter.distance = t_tmp;
+    //inter.happened = true;
+    //inter.pMaterial = m;
+    //inter.obj = this;
+    //inter.normal = normal;
+    //inter.coords = ray(t_tmp);
+
+    //return inter;
 }
 
 inline Vector3f Triangle::evalDiffuseColor(const Vector2f&) const
