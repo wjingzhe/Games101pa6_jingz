@@ -124,26 +124,26 @@ inline bool Bounds3::IntersectP(const Ray& ray) const
     float t_Max_y = (pMax.y - ray.origin.y) * ray.direction_inv.y;
     float t_Max_z = (pMax.z - ray.origin.z) * ray.direction_inv.z;
 
-    //if (ray.direction.x < 1e-6)//由于射线反向，所以逻辑大小相反了
-    //{
-    //    float temp = t_Min_x;
-    //    t_Min_x = t_Max_x;
-    //    t_Max_x = temp;
-    //}
-    //
-    //if (ray.direction.y < 1e-6)//由于射线反向，所以逻辑大小相反了
-    //{
-    //    float temp = t_Min_y;
-    //    t_Min_y = t_Max_y;
-    //    t_Max_y = temp;
-    //}
+    if (ray.direction.x < 0.0f)//由于射线反向，所以逻辑大小相反了
+    {
+        float temp = t_Min_x;
+        t_Min_x = t_Max_x;
+        t_Max_x = temp;
+    }
+    
+    if (ray.direction.y < 0.0f)//由于射线反向，所以逻辑大小相反了
+    {
+        float temp = t_Min_y;
+        t_Min_y = t_Max_y;
+        t_Max_y = temp;
+    }
 
-    //if (ray.direction.z < 1e-6)//由于射线反向，所以逻辑大小相反了
-    //{
-    //    float temp = t_Min_z;
-    //    t_Min_z = t_Max_z;
-    //    t_Max_z = temp;
-    //}
+    if (ray.direction.z < 0.0f)//由于射线反向，所以逻辑大小相反了
+    {
+        float temp = t_Min_z;
+        t_Min_z = t_Max_z;
+        t_Max_z = temp;
+    }
 
     float tEnter = std::max(t_Min_x, std::max(t_Min_y, t_Min_z));
     float tExit = std::min(t_Max_x, std::min(t_Max_y, t_Max_z));

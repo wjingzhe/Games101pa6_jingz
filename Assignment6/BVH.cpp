@@ -118,13 +118,13 @@ Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
     dirIsNeg[1] = ray.direction.y < 0;
     dirIsNeg[2] = ray.direction.z < 0;
 
-    if (!node->bounds.IntersectP(ray, ray.direction_inv, dirIsNeg))
-        return isect;
-
-    //if (!node->bounds.IntersectP(ray))//与包围盒无交
-    //{
+    //if (!node->bounds.IntersectP(ray, ray.direction_inv, dirIsNeg))
     //    return isect;
-    //}
+
+    if (!node->bounds.IntersectP(ray))//与包围盒无交
+    {
+        return isect;
+    }
 
     //判定包围盒内各BVHBuildNode与射线相交情况
     //已是叶子节点，进入模型细节判定
