@@ -52,7 +52,8 @@ bool Scene::trace(
 // at the intersection point.
 Vector3f Scene::castRay(const Ray &ray, int curDepthCount) const
 {
-    if (curDepthCount > this->maxDepth) {
+    if (curDepthCount > this->maxDepth)
+    {
         return Vector3f(0.0,0.0,0.0);
     }
     Intersection intersection = Scene::intersect(ray);

@@ -9,7 +9,6 @@
 #include <cassert>
 #include <array>
 
-
 bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1,
                           const Vector3f& v2, const Vector3f& orig,
                           const Vector3f& dir, float& tnear, float& u, float& v)
@@ -42,8 +41,8 @@ bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1,
 
 
 #define TEMP_EPSILON 1e-6
-bool rayTriangleIntersect_MollerTrumbore(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& orig,
-    const Vector3f& dir, float& tnear, float& u, float& v)
+bool rayTriangleIntersect_MollerTrumbore(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, 
+    const Vector3f& orig,const Vector3f& dir, float& tnear, float& u, float& v)
 {
     //{
     //    auto S = orig - v0;
@@ -295,7 +294,6 @@ inline bool Triangle::intersect(const Ray& ray, float& tnear,
 }
 
 inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
-
 
 inline Intersection Triangle::getIntersection(Ray ray)
 {

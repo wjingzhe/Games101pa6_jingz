@@ -20,7 +20,9 @@ BVHAccel::BVHAccel(std::vector<Object*> p, int maxPrimsInNode,
     int mins = ((int)diff / 60) - (hrs * 60);
     int secs = (int)diff - (hrs * 3600) - (mins * 60);
 
-    printf("\rBVH Generation complete: \nTime Taken: %i hrs, %i mins, %i secs\n\n",hrs, mins, secs);
+    printf(
+        "\rBVH Generation complete: \nTime Taken: %i hrs, %i mins, %i secs\n\n",
+        hrs, mins, secs);
 }
 
 BVHBuildNode* BVHAccel::recursiveBuild(std::vector<Object*> objects)
@@ -112,14 +114,6 @@ Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
 
     Intersection isect;
     isect.happened = false;
-
-    std::array<int, 3> dirIsNeg;
-    dirIsNeg[0] = ray.direction.x < 0;
-    dirIsNeg[1] = ray.direction.y < 0;
-    dirIsNeg[2] = ray.direction.z < 0;
-
-    //if (!node->bounds.IntersectP(ray, ray.direction_inv, dirIsNeg))
-    //    return isect;
 
     if (!node->bounds.IntersectP(ray))//与包围盒无交
     {
