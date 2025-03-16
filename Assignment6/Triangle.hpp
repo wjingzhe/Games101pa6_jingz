@@ -44,82 +44,76 @@ bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1,
 bool rayTriangleIntersect_MollerTrumbore(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, 
     const Vector3f& orig,const Vector3f& dir, float& tnear, float& u, float& v)
 {
-    //{
-    //    auto S = orig - v0;
-    //    auto E1 = v1 - v0;
-    //    auto E2 = v2 - v0;
-    //    auto S1 = crossProduct(dir, E2);
-    //    auto S2 = crossProduct(S, E1);
+    {
+        Vector3f edge1 = v1 - v0;
+        Vector3f edge2 = v2 - v0;
 
-    //    float S1E1 = dotProduct(S1, E1);
-    //    float t = dotProduct(S2, E2) / S1E1;
-    //    float b1 = dotProduct(S1, S) / S1E1;
-    //    float b2 = dotProduct(S2, dir) / S1E1;
+        Vector3f S1 = crossProduct(dir, edge2);
+        float E1S1 = dotProduct(edge1, S1);
+        if (abs(E1S1) <= TEMP_EPSILON)//克莱姆法则：为0，矩阵方程无解
+        {
+            return false;
+        }
+        float invDet = 1 / E1S1;
 
-    //    if (t >= 0.f && b1 >= 0.f && b2 >= 0.f && (1 - b1 - b2) >= 0.f) {
-    //        tnear = t;
-    //        u = b1;
-    //        v = b2;
-    //        return true;
-    //    }
+        Vector3f tvec = orig - v0;//S
+        Vector3f qvec = crossProduct(tvec, edge1);//S2
+        tnear = dotProduct(edge2, qvec) * invDet;
 
-    //    return false;
-    //}
+        u = dotProduct(tvec, S1);
+        if (u < 0 || u > E1S1)
+            return false;
+
+        v = dotProduct(dir, qvec);
+        if (v < 0 || u + v > E1S1)
+            return false;
+
+        u *= invDet;
+        v *= invDet;
+
+        return true;
+    }
 
     // TODO: Implement this function that tests whether the triangle
     // that's specified bt v0, v1 and v2 intersects with the ray (whose
     // origin is *orig* and direction is *dir*)
     // Also don't forget to update tnear, u and v.
 
-    Vector3f S = orig - v0;//其他算法中的大T
     Vector3f E1 = v1 - v0;
     Vector3f E2 = v2 - v0;
 
     Vector3f S1 = crossProduct(dir, E2);//p,射线与边2方向所在平面的法线___当作某种切线用？
-    float S1E1 = dotProduct(S1,E1);//det
+    float E1S1 = dotProduct(E1, S1);//det
     //射线与平面平行
-    if (abs(S1E1) <= TEMP_EPSILON)//克莱姆法则：为0，矩阵方程无解
+    if (abs(E1S1) <= TEMP_EPSILON)//克莱姆法则：为0，矩阵方程无解
     {
         return false;
     }
-    float inv_S1E1 = 1.0f / S1E1;//inv_det
+    float inv_E1S1 = 1.0f / E1S1;//inv_det
 
-    Vector3f S2 = crossProduct(S, E1);//Q=TxE1
-    float t = dotProduct(S2, E2) * inv_S1E1;
-    if ( t < 0.0f)
+    Vector3f S = orig - v0;//其他算法中的大Tvec
+    Vector3f S2 = crossProduct(S, E1);//Q=Tvec x E1
+    float t = dotProduct(E2, S2) * inv_E1S1;
+    if (t < 0.0f)
     {
         return false;
     }
-    //jingz 这里有个关键条件t,b1,b2值要为0+正值
-    //b1即u
-    float b1 = dotProduct(S1, S) / S1E1;
-    // b2
-    float b2 = dotProduct(S2, dir) / S1E1;
 
-    if (b1 >= 0.f && b2 >= 0.f && (1 - b1 - b2) >= TEMP_EPSILON)
+    float S_S1 = dotProduct(S, S1);
+    if (S_S1 < 0.0f)
+        return false;
+
+    float dir_S2 = dotProduct(dir, S2);
+    if (dir_S2 < 0.0f)
+        return false;
+
+    u = S_S1 * inv_E1S1;
+    v = dir_S2 * inv_E1S1;
+    if (1.0f > u && 1.0f > v && (1 - u - v) >= TEMP_EPSILON)
     {
         tnear = t;
-        u = b1;
-        v = b2;
         return true;
     }
-
-    //if (b1 < 0.0f || abs(b1) >= 1 + TEMP_EPSILON)
-    //{
-    //    return false;
-    //}
-
-    //if (b2 < 0.0f || abs(b2) >= 1 + TEMP_EPSILON)
-    //{
-    //    return false;
-    //}
-    //if (1.0f >= b1 + b2)
-    //{
-    //    tnear = t;
-    //    u = b1;
-    //    v = b2;
-    //    return true;
-    //}
 
     return false;
 }
